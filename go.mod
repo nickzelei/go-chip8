@@ -1,3 +1,3 @@
-module github.com/nickzelei/gochip8
+module github.com/nickzelei/go-chip8
 
 go 1.14
