@@ -93,8 +93,27 @@ func (c8 *Chip8) loadROM(filepath string) error {
 	return nil
 }
 
-func (c8 *Chip8) drawSprite(x, y uint16) {
-	// todo
+func (c8 *Chip8) drawSprite(x, y, sprite uint16) {
+	c8.v[0xF] = 0
+	var pix uint16
+
+	for yLine := uint16(0); yLine < sprite; yLine++ {
+		pix = uint16(c8.memory[c8.i+yLine])
+
+		for xLine := uint16(0); xLine < 8; xLine++ {
+			idx := (x + xLine + ((y + yLine) * 64))
+			if idx >= uint16(len(c8.gfx)) {
+				continue
+			}
+			if (pix & (0x80 >> xLine)) != 0 {
+				if c8.gfx[idx] == 1 {
+					c8.v[0xF] = 1
+				}
+				c8.gfx[idx] ^= 1
+			}
+		}
+	}
+	c8.drawFlag = true
 }
 
 func (c8 *Chip8) emulateCycle() {
@@ -126,7 +145,7 @@ func (c8 *Chip8) emulateCycle() {
 
 		x = uint16(c8.v[x])
 		y = uint16(c8.v[y])
-		c8.drawSprite(x, y)
+		c8.drawSprite(x, y, c8.opcode&0x000F)
 		c8.pc += 2
 		break
 
@@ -320,11 +339,11 @@ func (c8 *Chip8) emulateCycle() {
 		fmt.Printf("Unknown opcode: 0x%X\n", c8.opcode)
 	}
 
-	if c8.delayTimer > 0 {
-		c8.delayTimer--
-	}
+	// if c8.delayTimer > 0 {
+	// 	c8.delayTimer--
+	// }
 
-	if c8.soundTimer > 0 {
-		c8.soundTimer--
-	}
+	// if c8.soundTimer > 0 {
+	// 	c8.soundTimer--
+	// }
 }
