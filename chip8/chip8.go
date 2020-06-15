@@ -93,6 +93,7 @@ func (c8 *Chip8) loadROM(filepath string) error {
 	return nil
 }
 
+// todo: understand what this is doing
 func (c8 *Chip8) drawSprite(x, y, sprite uint16) {
 	c8.v[0xF] = 0
 	var pix uint16
