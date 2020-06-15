@@ -1,12 +1,13 @@
 package chip8
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
 )
 
-// Chip8 is the basic blah
+// Chip8 is the struct used for emulation
 type Chip8 struct {
 	memory [4096]byte
 
@@ -29,7 +30,7 @@ type Chip8 struct {
 	key [16]byte
 }
 
-var FontSet = [80]byte{
+var fontSet = [80]byte{
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	0x20, 0x60, 0x20, 0x20, 0x70, // 1
 	0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -50,6 +51,9 @@ var FontSet = [80]byte{
 
 const maxRomSize = 0xFFF - 0x200
 
+// ErrRomTooLarge is thrown if the read in ROM size is larger than the max
+var ErrRomTooLarge = errors.New("rom size is too large")
+
 // New Loads a new version of Chip8 with fonts and the rom
 func New(filepath string) (*Chip8, error) {
 	// rand.Seed(time.Now().UnixNano())
@@ -69,7 +73,7 @@ func New(filepath string) (*Chip8, error) {
 
 func (c8 *Chip8) loadFontset() {
 	for i := 0; i < 80; i++ {
-		c8.memory[0] = FontSet[i]
+		c8.memory[0] = fontSet[i]
 	}
 }
 
@@ -81,7 +85,7 @@ func (c8 *Chip8) loadROM(filepath string) error {
 	}
 
 	if len(rom) > maxRomSize {
-		panic("rom size is too large")
+		return ErrRomTooLarge
 	}
 	for i := 0; i < len(rom); i++ {
 		c8.memory[0x200+i] = rom[i]
